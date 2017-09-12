@@ -1,18 +1,38 @@
-#######################################################
-##### PROCESS MAGNET VARIABLES             ############
-#######################################################
+#'========================================================================================================================================
+#' Project:  AGCLIM50II
+#' Subject:  Code to process MAGNET RESULTS
+#' Author:   Michiel van Dijk
+#' Contact:  michiel.vandijk@wur.nl
+#'========================================================================================================================================
 
 ### PACKAGES
-BasePackages <- c("readr", "lazyeval", "foreign", "stringr", "car", "zoo", "tidyr", "RColorBrewer", "plyr", "dplyr", "ggplot2", "haven")
-lapply(BasePackages, library, character.only = TRUE)
-AdditionalPackages <- c("gdxrrw")
-lapply(AdditionalPackages, library, character.only = TRUE)
+if(!require(pacman)) install.packages("pacman")
+# Key packages
+#p_load("tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
+p_load("plyr", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
+# Spatial packages
+#p_load("rgdal", "ggmap", "raster", "rasterVis", "rgeos", "sp", "mapproj", "maptools", "proj4", "gdalUtils")
+# Additional packages
+p_load("gdxrrw")
+
+
+### SET WORKING DIRECTORY
+root <- find_root(is_rstudio_project)
+
+### SET DATAPATH
+#source(file.path(root, "code/Support/get_dataPath.r"))
+
+### R SETTINGS
+options(scipen=999) # surpress scientific notation
+options("stringsAsFactors"=FALSE) # ensures that characterdata that is loaded (e.g. csv) is not turned into factors
+options(digits=4)
 
 ### load required GAMS libraries (folder user specific)
 GAMSPath <- "C:\\24.4"
 #GAMSPath <- "C:\\Program Files\\GAMS\\win64\\24.6"
 igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
+
 
 ### Set working folder
 wdPath <- "D:\\R\\agCLIM50II"
@@ -27,8 +47,10 @@ options("stringsAsFactors"=FALSE) # ensures that characterdata that is loaded (e
 options(digits=4)
 
 ### Define scenarios, periods, path, project, sourcefile and 
-scenarios<-c("GDPExoSSP2")
-periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070", "2070-2080", "2080-2090", "2090-2100")
+scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2_C750", "GDPEndoSSP2_C1000",
+             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500")
+
+periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070")
 
 ### Source script that creates file names
 source("Code\\Load_Magnet.r")
@@ -116,8 +138,8 @@ MAGNET1_raw <- list()
 
 #### AREA: harvested and grazed area
 # MAGNET: land demand per sector (km2) = AREA
-# Note: several countries have multiple land types, here only GHA. As "ENDWL_COMM" is not in the grouping variable. These are summed.
-MAGNET1_raw[["AREA"]] <- current.f("AREA", "BaseData_b.gdx", "LDEM", lookup_upd, "LDEM", c("PROD_SECT", "REG"), c("PROD_SECT", "REG")) %>%
+# Note: several countries have multiple land types. As "ENDWL_COMM" is not in the grouping variable. These are summed.
+MAGNET1_raw[["AREA"]] <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "ENDWL_COMM", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT) %>%
   mutate(value = value/10, # MAGNET AREA is in km2
          unit = "1000 ha")

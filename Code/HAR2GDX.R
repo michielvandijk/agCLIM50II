@@ -48,7 +48,8 @@ dataResultPath <- "./4_MAGNET/Results"
 if (!file.exists(dataResultPath)) dir.create(dataResultPath) 
 
 # Define scenarios, periods and project
-scenarios<-c("GDPExoSSP2")
+scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2_C750", "GDPEndoSSP2_C1000",
+             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500")
 periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070", "2070-2080", "2080-2090", "2090-2100")
 
 # Create lookup table for update files
@@ -117,7 +118,7 @@ apply(BaseDataFiles, 1, function(x) har2gdx.f(file.path(dataBasePath, x[1]), fil
 # Convert update files to GDX
 apply(lookup_upd, 1, function(x) har2gdx.f(file.path(dataUpdatesPath, x["harSourceFiles"]), file.path(dataResultPath, x["gdxResultFiles"])))
 
-# Convert update files to GDX
+# Convert update view files to GDX
 apply(lookup_upd_view, 1, function(x) har2gdx.f(file.path(dataUpdatesPath, x["harSourceFiles"]), file.path(dataResultPath, x["gdxResultFiles"])))
 
 # One warning: Check
