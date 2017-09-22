@@ -48,40 +48,76 @@ angrowth.f<-function(d,var, period){
 # var <- "VALOUTPUT"
 # set.names <- c("TRAD_COMM","REG", "GDPSOURCE")
 
-# Functions to extract variables from GDX files
-var.extract2.f<-function(input, path, var, set.names){
+# Function load gdx file
+load_gdx2 <- function(input, path, var, set_names){
   file <- file.path(path, input)
-  #TMP<-rgdx.param(file, var, compress=FALSE, names=set.names, squeeze = FALSE) # does not work because it does not include 0 values that are not stored in GDX
-  TMP <- rgdx(file,list(name = var, compress = T, form = 'full'))
-  TMP <-TMP$val
-  ncol <- ncol(TMP)
-  if (ncol < 2){
-    TMP <- data.frame(V1 = row.names(TMP), V2 = TMP[,1])
-    row.names(TMP) <- NULL
-  } else {
-    TMP <- as.data.frame(as.table(TMP))
-  }
-  names(TMP) <- c(set.names, "value")
-  TMP <-unfactorize(TMP)
-  return(TMP)
+  gdx <- rgdx.param(file, var, compress=T, names=set_names, squeeze = FALSE) 
+  
+  # Select factors
+  factors <- gdx[sapply(gdx, class) =="factor"]
+  factor_levels <- lapply(factors, levels)
+  factor_combinations <- expand.grid(factor_levels)
+  names(factor_combinations) <- set_names
+  output <- left_join(factor_combinations, gdx)
+  output[is.na(output)] <- 0
+  names(output) <- c(set_names, "value")
+  output <- unfactorize(output)
+  return(output)
 }
 
-var.extract.f<-function(input, path, var, set.names){
+
+load_gdx <- function(input, path, var, set_names){
   file <- file.path(path, input["gdxResultFiles"])
-  #TMP<-rgdx.param(file, var, compress=FALSE, names=set.names, squeeze = FALSE)
-  TMP <- rgdx(file,list(name = var, compress = T, form = 'full'))
-  TMP <-TMP$val
-  ncol <- ncol(TMP)
-  if (ncol < 2){
-    TMP <- data.frame(V1 = row.names(TMP), V2 = TMP[,1])
-    row.names(TMP) <- NULL
-  } else {
-    TMP <- as.data.frame(as.table(TMP))
-  }
-  names(TMP) <- c(set.names, "value")
-  TMP <-unfactorize(TMP)
-  return(TMP)
+  gdx <- rgdx.param(file, var, compress=T, names=set_names, squeeze = FALSE) 
+  
+  # Select factors
+  factors <- gdx[sapply(gdx, class) =="factor"]
+  factor_levels <- lapply(factors, levels)
+  factor_combinations <- expand.grid(factor_levels)
+  names(factor_combinations) <- set_names
+  output <- left_join(factor_combinations, gdx)
+  output[is.na(output)] <- 0
+  names(output) <- c(set_names, "value")
+  output <- unfactorize(output)
+  return(output)
 }
+
+# 
+# 
+# # Functions to extract variables from GDX files
+# var.extract2.f<-function(input, path, var, set.names){
+#   file <- file.path(path, input)
+#   #TMP<-rgdx.param(file, var, compress=FALSE, names=set.names, squeeze = FALSE) # does not work because it does not include 0 values that are not stored in GDX
+#   TMP <- rgdx(file,list(name = var, compress = T, form = 'full'))
+#   TMP <-TMP$val
+#   ncol <- ncol(TMP)
+#   if (ncol < 2){
+#     TMP <- data.frame(V1 = row.names(TMP), V2 = TMP[,1])
+#     row.names(TMP) <- NULL
+#   } else {
+#     TMP <- as.data.frame(as.table(TMP))
+#   }
+#   names(TMP) <- c(set.names, "value")
+#   TMP <-unfactorize(TMP)
+#   return(TMP)
+# }
+# 
+# var.extract.f<-function(input, path, var, set.names){
+#   file <- file.path(path, input["gdxResultFiles"])
+#   #TMP<-rgdx.param(file, var, compress=FALSE, names=set.names, squeeze = FALSE)
+#   TMP <- rgdx(file,list(name = var, compress = T, form = 'full'))
+#   TMP <-TMP$val
+#   ncol <- ncol(TMP)
+#   if (ncol < 2){
+#     TMP <- data.frame(V1 = row.names(TMP), V2 = TMP[,1])
+#     row.names(TMP) <- NULL
+#   } else {
+#     TMP <- as.data.frame(as.table(TMP))
+#   }
+#   names(TMP) <- c(set.names, "value")
+#   TMP <-unfactorize(TMP)
+#   return(TMP)
+# }
 
 # varname <- "prodcur"
 # basefile <- "BaseData_b_view.gdx"
@@ -95,7 +131,7 @@ var.extract.f<-function(input, path, var, set.names){
 
 # function to create current series
 current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.names, group.var){
-  baseValue <- var.extract2.f(basefile, dataResultPath, varbase, set.names) %>%
+  baseValue <- load_gdx2(basefile, dataResultPath, varbase, set.names) %>%
     group_by_(.dots = group.var) %>%
     summarize(value = sum(value, na.rm=T))
   
@@ -103,7 +139,7 @@ current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.name
   
   scenfile <- dplyr::select_(scenariofile, .dots = c("gdxResultFiles", "year", "scenario"))
   
-  scenValue <- adply(scenfile, 1, var.extract.f, dataResultPath, varsen, set.names) %>%
+  scenValue <- adply(scenfile, 1, load_gdx, dataResultPath, varsen, set.names) %>%
     dplyr::select(-gdxResultFiles) %>%
     group_by_(.dots = group.var2) %>%
     summarize(value = sum(value, na.rm=T)) %>%
@@ -141,13 +177,13 @@ current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.name
 
 # Functions for prodvol IMPO where sets in base year and growth variable are not the same
 constant.f <- function(varname, var, set.names, group.var, var.growth, set.names.growth){
-  baseValue <- var.extract2.f("BaseData_b_view.gdx", dataResultPath, var, set.names) %>%
+  baseValue <- load_gdx2("BaseData_b_view.gdx", dataResultPath, var, set.names) %>%
     group_by_(.dots = group.var) %>%
     summarize(value = sum(value, na.rm=T))
   
   TRAD_COMM <- unique(baseValue$TRAD_COMM)
   
-  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, var.extract.f, dataResultPath, var.growth, set.names.growth) %>%
+  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, load_gdx, dataResultPath, var.growth, set.names.growth) %>%
     dplyr::select(-gdxResultFiles) %>%
     arrange_(.dots = c("scenario", set.names.growth, "year")) %>%
     group_by_(.dots = c("scenario", set.names.growth)) %>%
@@ -192,11 +228,11 @@ constant.f <- function(varname, var, set.names, group.var, var.growth, set.names
 # Functions for GDP cons, expo and (perhaps) IMPO where sets in base year and growth variable are the same
 constant2.f <- function(varname, basefile, var, set.names, group.var, var.growth, set.names.growth){
   
-  baseValue <- var.extract2.f(basefile, dataResultPath, var, set.names) %>%
+  baseValue <- load_gdx2(basefile, dataResultPath, var, set.names) %>%
     group_by_(.dots = group.var) %>%
     summarize(value = sum(value, na.rm=T))
   
-  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, var.extract.f, dataResultPath, var.growth, set.names.growth) %>%
+  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, load_gdx, dataResultPath, var.growth, set.names.growth) %>%
     dplyr::select(-gdxResultFiles) %>%
     arrange_(.dots = c("scenario", set.names.growth, "year")) %>%
     group_by_(.dots = c("scenario", set.names.growth)) %>%
@@ -229,13 +265,13 @@ constant2.f <- function(varname, basefile, var, set.names, group.var, var.growth
 
 # Functions VFM, where sets in base year and growth variable are the different
 constant.3f <- function(varname, var, set.names, group.var, var.growth, set.names.growth){
-  baseValue <- var.extract2.f("BaseData_b.gdx", dataResultPath, var, set.names) %>%
+  baseValue <- load_gdx2("BaseData_b.gdx", dataResultPath, var, set.names) %>%
     group_by_(.dots = group.var) %>%
     summarize(value = sum(value, na.rm=T))
   
   ENDW_COMM_unique <- unique(baseValue$ENDW_COMM)
   
-  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, var.extract.f, dataResultPath, var.growth, set.names.growth) %>%
+  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, load_gdx, dataResultPath, var.growth, set.names.growth) %>%
     dplyr::select(-gdxResultFiles) %>%
     arrange_(.dots = c("scenario", set.names.growth, "year")) %>%
     group_by_(.dots = c("scenario", set.names.growth)) %>%
@@ -271,7 +307,7 @@ constant.3f <- function(varname, var, set.names, group.var, var.growth, set.name
 # Function for exogenous yield
 aland.f <- function(varname, var.growth, set.names.growth){
   
-  aland <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, var.extract.f, dataResultPath, var.growth, set.names.growth) %>%
+  aland <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, load_gdx, dataResultPath, var.growth, set.names.growth) %>%
     dplyr::select(-gdxResultFiles) %>%
     arrange_(.dots = c("scenario", set.names.growth, "year")) %>%
     mutate(variable = "YEXO")
@@ -286,7 +322,7 @@ aland.f <- function(varname, var.growth, set.names.growth){
 # Function for cumulative aland index
 aland2.f <- function(varname, var.growth, set.names.growth){
   
-  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, var.extract.f, dataResultPath, var.growth, set.names.growth) %>%
+  scenValueGrowth <- adply(lookup_sol[,c("gdxResultFiles", "year", "scenario")], 1, load_gdx, dataResultPath, var.growth, set.names.growth) %>%
     dplyr::select(-gdxResultFiles) %>%
     arrange_(.dots = c("scenario", set.names.growth, "year")) %>%
     group_by_(.dots = c("scenario", set.names.growth)) %>%

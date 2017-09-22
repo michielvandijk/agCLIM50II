@@ -8,8 +8,8 @@
 ### PACKAGES
 if(!require(pacman)) install.packages("pacman")
 # Key packages
-#p_load("tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
-p_load("plyr", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
+p_load("plyr", "tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
+#p_load("plyr", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
 # Spatial packages
 #p_load("rgdal", "ggmap", "raster", "rasterVis", "rgeos", "sp", "mapproj", "maptools", "proj4", "gdalUtils")
 # Additional packages
@@ -139,7 +139,7 @@ MAGNET1_raw <- list()
 #### AREA: harvested and grazed area
 # MAGNET: land demand per sector (km2) = AREA
 # Note: several countries have multiple land types. As "ENDWL_COMM" is not in the grouping variable. These are summed.
-MAGNET1_raw[["AREA"]] <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "ENDWL_COMM", "REG")) %>%
+MAGNET1_raw[["AREA"]] <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT) %>%
   mutate(value = value/10, # MAGNET AREA is in km2
          unit = "1000 ha")
@@ -385,10 +385,10 @@ PRODlsp <-bind_rows(
 MAGNET3_raw[["YILD"]] <- bind_rows(
   filter(MAGNET1_2, variable %in% c("AREA") &
            sector %in% c("AGR", "CGR", "CRP", "LSP", "DRY", "OSD", "PFB", "RIC", "RUM", "SGC", "VFN",
-                         "WHT", "TOT")),
+                         "WHT", "ECP", "TOT")),
   filter(MAGNET1_2, variable %in% c("PROD") &
            sector %in% c("AGR", "CGR", "CRP", "DRY", "OSD", "PFB", "RIC", "RUM", "SGC", "VFN",
-                         "WHT", "TOT")),
+                         "WHT", "ECP", "TOT")),
   PRODlsp) %>% # Only sectors with land
   select(-unit) %>%
   group_by(scenario, region, sector, year) %>%
@@ -409,7 +409,7 @@ aland <- aland2.f("aland", "aland", c("PROD_SECT", "MREG")) %>%
   mutate(year = as.character(year))
 
 
-AREA <-current.f("AREA", "BaseData_b.gdx", "LDEM", lookup_upd, "LDEM", c("PROD_SECT", "REG"), c("PROD_SECT", "REG")) %>%
+AREA <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT,
          AREA = value) %>% 
   select(-variable) %>%
@@ -597,8 +597,8 @@ MAGNET_tot$value[is.infinite(MAGNET_tot$value)] <- 0
 
 # agCLIM50 uses - LYLD for	Livestock yield (endogenous) and LYXO for	Exogenous livestock yield trend 
 # We change the names
-MAGNET_tot$variable[MAGNET_tot$variable == "YILD" & MAGNET_tot$sector %in% c("LSP", "DRY", "OAP", "RUM")] <- "LYLD"
-MAGNET_tot$variable[MAGNET_tot$variable == "YEXO" & MAGNET_tot$sector %in% c("LSP", "DRY", "OAP", "RUM")] <- "LYXO"
+MAGNET_tot$variable[MAGNET_tot$variable == "YILD" & MAGNET_tot$sector %in% c("LSP", "DRY", "NRM", "RUM")] <- "LYLD"
+MAGNET_tot$variable[MAGNET_tot$variable == "YEXO" & MAGNET_tot$sector %in% c("LSP", "DRY", "NRM", "RUM")] <- "LYXO"
 
 # Change sector into item and select variables and change order of variables
 MAGNET_tot <- MAGNET_tot %>%
@@ -607,12 +607,12 @@ MAGNET_tot <- MAGNET_tot %>%
   rename(item = sector) 
 
 # Rename scenarios in line with agCLIM50
-scenMAGNET2agCLIM50 <- read_csv("Mappings/scenMAGNET2agCLIM50II.csv") %>%
+scenMAGNET2agCLIM50II <- read_csv("Mappings/scenMAGNET2agCLIM50II.csv") %>%
   rename(scenario = scenMAGNET)
 
-MAGNET_tot <- left_join(MAGNET_tot, scenMAGNET2agCLIM50) %>%
+MAGNET_tot <- left_join(MAGNET_tot, scenMAGNET2agCLIM50II) %>%
   select(-scenario) %>%
-  rename(scenario = scenagCLIM50)
+  rename(scenario = scenagCLIM50II)
 
 # Set order of Remove values in current values
 MAGNET_tot <- MAGNET_tot %>%
