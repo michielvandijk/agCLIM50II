@@ -7,9 +7,21 @@ base_file <- "Basedata_b.gdx"
 path <- dataResultPath
 var <- varbase<- "LTYPEDEM"
 group.var <- set.names <- set_names <- c("PROD_SECT", "ENDWL_COMM", "REG")
+scenariofile <- lookup_upd
+varsen <- "LDEM"
 
+
+
+MAGNET1_raw[["AREA"]] <- 
+  
+  x <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "ENDWL_COMM", "REG")) %>%
+  rename(TRAD_COMM = PROD_SECT) %>%
+  mutate(value = value/10, # MAGNET AREA is in km2
+         unit = "1000 ha")
+
+# function to create current series
 current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.names, group.var){
-  baseValue <- var.extract2.f(basefile, dataResultPath, varbase, set.names) %>%
+  baseValue <- load_gdx2(basefile, dataResultPath, varbase, set.names) %>%
     group_by_(.dots = group.var) %>%
     summarize(value = sum(value, na.rm=T))
   
@@ -17,7 +29,7 @@ current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.name
   
   scenfile <- dplyr::select_(scenariofile, .dots = c("gdxResultFiles", "year", "scenario"))
   
-  scenValue <- adply(scenfile, 1, var.extract.f, dataResultPath, varsen, set.names) %>%
+  scenValue <- adply(scenfile, 1, load_gdx, dataResultPath, varsen, set.names) %>%
     dplyr::select(-gdxResultFiles) %>%
     group_by_(.dots = group.var2) %>%
     summarize(value = sum(value, na.rm=T)) %>%

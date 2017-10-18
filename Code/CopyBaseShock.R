@@ -6,12 +6,12 @@
 # Below some raw code to do this (unfinished)# 
 
 
-modelPath <- "D:/Tabeau/Release_May_2016IM_NatResClim50_Africa"
+modelPath <- "D:/Tabeau/AgCLim50_2"
 
-dataUpdatesPath <- paste(modelPath, "4_MAGNET/Updates", sep ="/")
-dataSolPath <- paste(modelPath, "4_MAGNET/Solutions", sep ="/")
-#dataShocksPath <- paste(modelPath, "4_MAGNET/Shocks", sep ="/")
-dataResultPath <- paste(modelPath, "4_MAGNET/Results", sep ="/")  
+dataUpdatesPath <- paste(modelPath, "Updates", sep ="/")
+dataSolPath <- paste(modelPath, "Solutions", sep ="/")
+#dataShocksPath <- paste(modelPath, "Shocks", sep ="/")
+dataResultPath <- paste(modelPath, "Results", sep ="/")  
 
 # har file to be copied and rename
 baseShock <- "GDPEndoSSP2"

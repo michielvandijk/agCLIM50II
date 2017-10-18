@@ -21,7 +21,7 @@ igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
 
 # Set working folder
-wdPath <- "D:/Tabeau/Release_May_2016IM_NatResClim50_Africa"
+wdPath <- "D:/Tabeau/AgCLim50_2"
 setwd(wdPath)  
 
 # FUNCTIONS
@@ -40,17 +40,17 @@ options(digits=4)
 # Perhaps also view data should be uploaded.
 
 # Create new folder for relevant files
-dataBasePath <- "./4_MAGNET/Basedata"
-dataUpdatesPath <- "./4_MAGNET/Updates"
-dataSolPath <- "./4_MAGNET/Solutions"
+dataBasePath <- "./Basedata"
+dataUpdatesPath <- "./Updates"
+dataSolPath <- "./Solutions"
 #dataShocksPath <- "./4_MAGNET/Shocks"
-dataResultPath <- "./4_MAGNET/Results"
+dataResultPath <- "./Results"
 if (!file.exists(dataResultPath)) dir.create(dataResultPath) 
 
 # Define scenarios, periods and project
 scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2_C750", "GDPEndoSSP2_C1000",
              "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500")
-periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070", "2070-2080", "2080-2090", "2090-2100")
+periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070")
 
 # Create lookup table for update files
 sourcefile<-c("update")

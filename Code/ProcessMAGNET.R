@@ -8,7 +8,7 @@
 ### PACKAGES
 if(!require(pacman)) install.packages("pacman")
 # Key packages
-p_load("plyr", "tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
+p_load("plyr", "tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot", "lazyeval")
 #p_load("plyr", "readxl", "stringr", "scales", "RColorBrewer", "rprojroot")
 # Spatial packages
 #p_load("rgdal", "ggmap", "raster", "rasterVis", "rgeos", "sp", "mapproj", "maptools", "proj4", "gdalUtils")
@@ -38,8 +38,8 @@ igdx(GAMSPath)
 wdPath <- "D:\\R\\agCLIM50II"
 setwd(wdPath)  
 
-dataPath <- "D:\\Tabeau\\Release_May_2016IM_NatResClim50_Africa"
-dataResultPath <- "D:\\Tabeau\\Release_May_2016IM_NatResClim50_Africa\\4_MAGNET\\Results"
+dataPath <- "D:\\Tabeau\\AgCLim50_2"
+dataResultPath <- "D:\\Tabeau\\AgCLim50_2\\Results"
 
 ### R SETTINGS
 options(scipen=999) # surpress scientific notation
