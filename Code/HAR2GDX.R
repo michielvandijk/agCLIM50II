@@ -43,6 +43,7 @@ options(digits=4)
 dataBasePath <- "./Basedata"
 dataUpdatesPath <- "./Updates"
 dataSolPath <- "./Solutions"
+dataAddPath <- "./Additional"
 #dataShocksPath <- "./4_MAGNET/Shocks"
 dataResultPath <- "./Results"
 if (!file.exists(dataResultPath)) dir.create(dataResultPath) 
@@ -110,6 +111,14 @@ names(lookup_slc) <- c("scenario", "period", "sourcefile", "start", "year")
 lookup_slc$harSourceFiles <- paste(with(lookup_slc, paste(scenario, period, sourcefile, sep="_")), ".slc", sep="")
 lookup_slc$gdxResultFiles <- paste(with(lookup_slc, paste(scenario, period, destinationfile, sep="_")), ".gdx", sep="")
 
+
+### Create lookup table for additional files
+# Read files
+sourceFile <- list.files("Additional")
+destinationfile <- "Emissions_Reduct_Tax.gdx"
+lookup_add <- data.frame(harSourceFiles = sourceFile, gdxSourceFiles = destinationfile)
+apply(lookup_add, 1, function(x) har2gdx.f(file.path(dataAddPath, x[1]), file.path(dataResultPath, x[2])))
+
 ######## CONVERT FILES
 
 # Add base period GDX files
@@ -128,4 +137,4 @@ apply(lookup_sol, 1, function(x) har2gdx.f(file.path(dataSolPath, x["harSourceFi
 # Convert slc files to GDX
 #apply(lookup_slc, 1, function(x) har2gdx.f(file.path(dataSolPath, x["harSourceFiles"]), file.path(dataResultPath, x["gdxResultFiles"])))
 
-
+# Convert additional files

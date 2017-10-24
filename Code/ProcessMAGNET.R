@@ -577,6 +577,7 @@ MAGNET3_raw[["CALO"]] <- left_join(NQT, POPT) %>%
   select(-POPT)
 
 
+
 #################
 ### MERGE ALL ###
 #################

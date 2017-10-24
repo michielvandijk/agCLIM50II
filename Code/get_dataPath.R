@@ -16,9 +16,14 @@
 if(Sys.info()["user"] == "dijk158") {
   dataPath <- "D:\\R\\agCLIM50II"}
 
+if(Sys.info()["user"] == "dijk158") {
+  GAMSPath <- "C:\\24.4"}
+
+
+
 # Michiel IIASA
 if(Sys.info()["user"] == "vandijkm") {
-  dataPath <- "C:/Users/vandijkm/Dropbox/AgClim50 scenario results"}
+  dataPath <- "NONE"}
 
 # Anybody else:
 if(Sys.info()["user"] == "") {
