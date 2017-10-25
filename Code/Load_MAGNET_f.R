@@ -149,7 +149,7 @@ current.f <- function(varname, basefile, varbase, scenariofile, varsen, set.name
   
   base.scenario.f <- function(scen, base, varname) {
     base$scenario <- scen
-    base$year <- "2007"
+    base$year <- "2011"
     base$variable <- varname
     return(base)
   } 
@@ -201,7 +201,7 @@ constant.f <- function(varname, var, set.names, group.var, var.growth, set.names
   
   base.scenario.f <- function(scen, base, varname) {
     base$scenario <- scen
-    base$year <- "2007"
+    base$year <- "2011"
     base$variable <- varname
     return(base)
   } 
@@ -248,7 +248,7 @@ constant2.f <- function(varname, basefile, var, set.names, group.var, var.growth
   
   base.scenario.f <- function(scen, base, varname) {
     base$scenario <- scen
-    base$year <- "2007"
+    base$year <- "2011"
     base$variable <- varname
     return(base)
   } 
@@ -288,7 +288,7 @@ constant.3f <- function(varname, var, set.names, group.var, var.growth, set.name
   
   base.scenario.f <- function(scen, base, varname) {
     base$scenario <- scen
-    base$year <- "2007"
+    base$year <- "2011"
     base$variable <- varname
     return(base)
   } 
@@ -334,7 +334,7 @@ aland2.f <- function(varname, var.growth, set.names.growth){
   comm <- unique(scenValueGrowth$PROD_SECT)
   reg <- unique(scenValueGrowth$MREG)
   baseValue <- expand.grid(scenario = scen, PROD_SECT = comm, MREG = reg, stringsAsFactors = FALSE) %>%
-    mutate(year= 2007, variable = varname, value = 1)
+    mutate(year= 2011, variable = varname, value = 1)
   
   index <- baseValue %>%
     bind_rows(., scenValueGrowth) %>%
