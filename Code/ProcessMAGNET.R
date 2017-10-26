@@ -125,11 +125,25 @@ map_agr <- secMAGNET2agCLIM50 %>%
   na.omit %>%
   unique
 
+map_agr_p <- secMAGNET2agCLIM50 %>%
+  select(TRAD_COMM, sector = agr_prim) %>%
+  na.omit %>%
+  unique
+
 map_tot <- secMAGNET2agCLIM50 %>%
   select(TRAD_COMM, sector = tot) %>%
   na.omit %>%
   unique
+
+
+#########################################
+#### Variables with region dimension ####
+#########################################
+
+# Source data
+source("Code/MAGNET_reg.R")
  
+
 ####################################################
 #### Variables with sector and region dimension ####
 ####################################################
@@ -287,29 +301,6 @@ MAGNET1_raw[["FEED"]] <- FEED; rm(FEED)
 MAGNET1_raw[["FOOD"]] <- FOOD; rm(FOOD)
 MAGNET1_raw[["OTHU"]] <- OTHU; rm(OTHU)
 
-############################################
-### Variables with only region dimension ###
-############################################
-MAGNET2_raw <- list()
-
-# GDP volume
-MAGNET2_raw[["GDPT"]] <-  constant2.f("GDPT","BaseData_b_view.gdx", "GDPSRC", c("REG", "GDPSOURCE"), "REG", "qgdp", "REG") %>%
-         mutate(value = value/1000, unit = "bn USD 2007 MER")
-       
-# POP total population
-MAGNET2_raw[["POPT"]] <- constant2.f("POPT", "BaseData_b.gdx", "POP", c("REG"), c("REG"), "pop", c("REG")) %>%
-  mutate(unit = "mn pers")
-
-# GDP value = GDPSRC(SREG,SUM) AND GDPSRC(SREG,SUM)  (NOT certified)
-MAGNET2_raw[["GDPval"]] <- current.f("GDPval", "BaseData_b_view.gdx", "GDPSRC", lookup_upd_view, "GDPSRC", c("REG", "GDPSOURCE"), c("REG")) %>%
-  mutate(value = value/1000, unit = "bn USD MER")
-
-MAGNET2_raw[["NQT"]] <- current.f("NQT", "BaseData_b_view.gdx",  "NQT", lookup_upd_view, "NQT", c("NUTRIENTS", "REG"), c("NUTRIENTS", "REG")) %>%
-  rename(unit = NUTRIENTS) %>%
-  filter(unit == "CAL")
-
-
-
 
 #####################
 ### COMBINE DATA ###
@@ -319,7 +310,7 @@ MAGNET1 <- bind_rows(MAGNET1_raw) %>%
               ungroup() %>%
               mutate(REG = toupper(REG)) # REG in capitals for mapping
 
-MAGNET2 <- bind_rows(MAGNET2_raw) %>%
+MAGNET2 <- MAGNET_reg %>%
   mutate(REG = toupper(REG)) # REG in capitals for mapping
          
   
@@ -365,6 +356,23 @@ MAGNET1_2 <- rbind(MAGNET1, MAGNET2)
 ############################
 
 MAGNET3_raw <- list()
+
+### Emissions AgCLIM50II
+source("Code/Emissions_AgClim50II.R")
+
+# Sectoral mappings
+emis_agclim50II <- bind_rows(
+  subtot_f(emis_agclim50II, c("scenario", "year", "sector", "REG", "variable", "unit"), "value", map_sec),
+  subtot_f(emis_agclim50II, c("scenario", "year", "sector", "REG", "variable", "unit"), "value", map_agr_p)
+  )
+
+# Regional mappings
+emis_agclim50II <-bind_rows(
+  subtot_f(emis_agclim50II, c("scenario", "year", "sector", "region", "variable", "unit"), "value", map_reg),
+  subtot_f(emis_agclim50II, c("scenario", "year", "sector", "region", "variable", "unit"), "value", map_wld),
+  subtot_f(emis_agclim50II, c("scenario", "year", "sector", "region", "variable", "unit"), "value", map_con)
+)
+
 
 ### YILD: Endogenous yield
 # Need to calculated over RMEAT and DAIRY only.
@@ -582,7 +590,7 @@ MAGNET3_raw[["CALO"]] <- left_join(NQT, POPT) %>%
 ### MERGE ALL ###
 #################
 
-MAGNET_tot <- bind_rows(MAGNET1_2, MAGNET3_raw) %>%
+MAGNET_tot <- bind_rows(MAGNET1_2, MAGNET3_raw, emis_agclim50II) %>%
   mutate(model = "MAGNET",
          year = as.numeric(year))
 
@@ -604,7 +612,8 @@ MAGNET_tot$variable[MAGNET_tot$variable == "YEXO" & MAGNET_tot$sector %in% c("LS
 # Change sector into item and select variables and change order of variables
 MAGNET_tot <- MAGNET_tot %>%
   filter(variable %in% c("POPT","GDPT","XPRP","XPRX","AREA","YILD","YEXO","LYLD","LYXO","FOOD","FEED", "CALO",
-                                                 "OTHU","IMPO","EXPO","CALO","PROD","CONS","NETT","FRUM","FNRM","FDRY","FFSH")) %>%
+                                                 "OTHU","IMPO","EXPO","CALO","PROD","CONS","NETT","FRUM","FNRM","FDRY","FFSH",
+                          "GCH4", "GN2O", "TCH4", "TN2O", "EMIS", "ECO2", "ECH4", "EN2O")) %>%
   rename(item = sector) 
 
 # Rename scenarios in line with agCLIM50

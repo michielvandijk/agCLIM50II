@@ -42,8 +42,8 @@ GN2O <- bind_rows(
     dplyr::select(-GHG),
   current.f("GN2O", "BaseData_b.gdx",  "QGHGX_GAS", lookup_upd, "DQGHGX", c("GHG", "FUELX", "FUELUSER", "REG"), c("GHG", "FUELX", "FUELUSER", "REG")) %>%
     filter(GHG == "N2O", FUELX == "Act", FUELUSER %in% sec3) %>%
-    mutate(unit = "MtCO2e") %>%
-    dplyr::select(-GHG, -FUELX)) %>%
+    mutate(unit = "MtCO2e")) %>%
+    dplyr::select(-GHG, -FUELX) %>%
   rename(TRAD_COMM = FUELUSER)
 
 
@@ -52,13 +52,13 @@ GN2O <- bind_rows(
 PROD <- current.f("PROD", "BaseData_b.gdx",  "QPROD", lookup_upd, "QPROD", c("PROD_SECT", "REG"), c("PROD_SECT", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT) %>%
   filter(TRAD_COMM %in% sec1) %>%
-  mutate(value = value/1000, unit = "1000 tons")
+  mutate(value = value/1000, unit = "1000 t")
 
 # CONT
 CONS <- current.f("CONS", "BaseData_b_view.gdx",  "NQSECT", lookup_upd_view, "NQSECT", c("NUTRIENTS", "PRIM_AGRI", "REG"), c("NUTRIENTS", "PRIM_AGRI","REG"))  %>%
   rename(TRAD_COMM = PRIM_AGRI) %>%
   filter(NUTRIENTS == "QUANT", TRAD_COMM %in% sec1) %>%
-  mutate(value = value/1000, unit = "1000 tons") %>%
+  mutate(value = value/1000, unit = "1000 t") %>%
   dplyr::select(-NUTRIENTS)
 
 
@@ -66,14 +66,18 @@ CONS <- current.f("CONS", "BaseData_b_view.gdx",  "NQSECT", lookup_upd_view, "NQ
 CN2O <- bind_rows(GN2O, PROD) %>%
   filter(scenario == "GDPEndoSSP2") %>%
   group_by(year, REG, TRAD_COMM) %>%
-  summarize(CN2O = value[variable == "GN2O"]/value[variable == "PROD"]) 
+  summarize(CN2O = value[variable == "GN2O"]/value[variable == "PROD"]) %>%
+  mutate(CN2O = ifelse(is.infinite(CN2O), 0, CN2O),
+         CN2O = ifelse(is.na(CN2O), 0, CN2O))
   
 
 ### CCH4  
 CCH4 <- bind_rows(GCH4, PROD) %>%
   filter(scenario == "GDPEndoSSP2") %>%
   group_by(year, REG, TRAD_COMM) %>%
-  summarize(CCH4 = value[variable == "GCH4"]/value[variable == "PROD"]) 
+  summarize(CCH4 = value[variable == "GCH4"]/value[variable == "PROD"])  %>%
+  mutate(CCH4 = ifelse(is.infinite(CCH4), 0, CCH4),
+         CCH4 = ifelse(is.na(CCH4), 0, CCH4))
 
 
   
@@ -125,5 +129,12 @@ TN2O <- full_join(PROD, CN2O) %>%
   dplyr::select(-CN2O, -EMRF)
 summary(TN2O)
 
+### COMBINE
+emis_agclim50II <- bind_rows(PROD, CONS, GCH4, GN2O, TCH4, TN2O)
+
+
 ### CTAX
-xtabs(~FUELX + FUELUSER, data = EMRF)
+
+
+### CLEAN UP
+rm(EMRF_CH4, EMRF_N2O, CCH4, CN2O, PROD, CONS, GCH4, GN2O, TCH4, TN2O)

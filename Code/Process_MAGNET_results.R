@@ -16,29 +16,24 @@ p_load("plyr", "tidyverse", "readxl", "stringr", "scales", "RColorBrewer", "rpro
 p_load("gdxrrw")
 
 
-### SET WORKING DIRECTORY
-root <- find_root(is_rstudio_project)
-
-### SET DATAPATH
-#source(file.path(root, "code/Support/get_dataPath.r"))
-
 ### R SETTINGS
 options(scipen=999) # surpress scientific notation
 options("stringsAsFactors"=FALSE) # ensures that characterdata that is loaded (e.g. csv) is not turned into factors
 options(digits=4)
 
+### SET WORKING DIRECTORY
+root <- find_root(is_rstudio_project)
+
+
+### SET DATAPATH
+source(file.path(root, "code/get_dataPath.r"))
+
+
 ### load required GAMS libraries (folder user specific)
-GAMSPath <- "C:\\24.4"
-#GAMSPath <- "C:\\Program Files\\GAMS\\win64\\24.6"
 igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
 
-
-### Set working folder
-wdPath <- "D:\\R\\agCLIM50II"
-setwd(wdPath)  
-
-dataPath <- "D:\\Tabeau\\AgCLim50_2"
+# Set dataPath
 dataResultPath <- "D:\\Tabeau\\AgCLim50_2\\Results"
 
 ### R SETTINGS
@@ -52,5 +47,11 @@ scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2
 
 periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070")
 
+
 ### Source script that creates file names
 source("Code\\Load_Magnet.r")
+
+
+### SOURCE BASIC MAGNET OUTPUT
+# Emissions
+#source("code/Emissions.r")
