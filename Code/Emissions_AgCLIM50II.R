@@ -23,13 +23,14 @@ igdx(GAMSPath)
 
 
 ### SECTORS
-sec1 <- c("pdr", "wht", "grain", "oils", "sug", "hort", "crops", "cattle", "pigpoul", "milk")
-sec2 <- c("pdr", "wht", "grain", "oils", "sug", "hort", "crops")
+sec1 <- c("pdr", "wht", "grain", "oils", "sug", "hort", "crops", "oagr", "cattle", "pigpoul", "milk")
+sec2 <- c("pdr", "wht", "grain", "oils", "sug", "hort", "oagr", "crops")
 sec3 <- c("cattle", "pigpoul", "milk")
+sec4 <- c("pdr", "cattle", "pigpoul", "milk")
 
 ### CH4
 GCH4 <- current.f("GCH4", "BaseData_b.gdx",  "QGHGX_GAS", lookup_upd, "DQGHGX", c("GHG", "FUELX", "FUELUSER", "REG"), c("GHG", "FUELX", "FUELUSER", "REG")) %>%
-  filter(GHG == "CH4", FUELX == "Act", FUELUSER %in% sec1) %>%
+  filter(GHG == "CH4", FUELX == "Act", FUELUSER %in% sec4) %>%
   mutate(unit = "MtCO2e") %>%
   dplyr::select(-GHG, -FUELX) %>%
   rename(TRAD_COMM = FUELUSER)
@@ -54,8 +55,8 @@ PROD <- current.f("PROD", "BaseData_b.gdx",  "QPROD", lookup_upd, "QPROD", c("PR
   filter(TRAD_COMM %in% sec1) %>%
   mutate(value = value/1000, unit = "1000 t")
 
-# CONT
-CONS <- current.f("CONS", "BaseData_b_view.gdx",  "NQSECT", lookup_upd_view, "NQSECT", c("NUTRIENTS", "PRIM_AGRI", "REG"), c("NUTRIENTS", "PRIM_AGRI","REG"))  %>%
+# FOOD
+FOOD <- current.f("FOOD", "BaseData_b_view.gdx",  "NQSECT", lookup_upd_view, "NQSECT", c("NUTRIENTS", "PRIM_AGRI", "REG"), c("NUTRIENTS", "PRIM_AGRI","REG"))  %>%
   rename(TRAD_COMM = PRIM_AGRI) %>%
   filter(NUTRIENTS == "QUANT", TRAD_COMM %in% sec1) %>%
   mutate(value = value/1000, unit = "1000 t") %>%
@@ -73,7 +74,7 @@ CN2O <- bind_rows(GN2O, PROD) %>%
 
 ### CCH4  
 CCH4 <- bind_rows(GCH4, PROD) %>%
-  filter(scenario == "GDPEndoSSP2") %>%
+  filter(scenario == "GDPEndoSSP2", TRAD_COMM %in% sec4) %>%
   group_by(year, REG, TRAD_COMM) %>%
   summarize(CCH4 = value[variable == "GCH4"]/value[variable == "PROD"])  %>%
   mutate(CCH4 = ifelse(is.infinite(CCH4), 0, CCH4),
@@ -107,11 +108,11 @@ EMRF_N2O <- rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "O
 TCH4 <- full_join(PROD, CCH4) %>%
   left_join(EMRF_CH4) %>%
   filter(scenario != "GDPEndoSSP2", year !=2011, 
-         TRAD_COMM %in% c("pdr", "cattle", "pigpoul", "milk")) %>%
+         TRAD_COMM %in% sec4) %>%
   mutate(EMRF = ifelse(is.na(EMRF), 0, EMRF),
          value = value * CCH4 * EMRF,
          variable = "TCH4", 
-         unit = "ToADD") %>%
+         unit = "MtCO2e") %>%
   dplyr::select(-CCH4, -EMRF)
 summary(TCH4)
 
@@ -125,16 +126,16 @@ TN2O <- full_join(PROD, CN2O) %>%
   mutate(EMRF = ifelse(is.na(EMRF), 0, EMRF),
          value = value * CN2O * EMRF,
          variable = "TN2O",
-         unit = "ToAdd") %>%
+         unit = "MtCO2e") %>%
   dplyr::select(-CN2O, -EMRF)
 summary(TN2O)
 
 ### COMBINE
-emis_agclim50II <- bind_rows(PROD, CONS, GCH4, GN2O, TCH4, TN2O)
+emis_agclim50II <- bind_rows(PROD, FOOD, GCH4, GN2O, TCH4, TN2O)
 
 
 ### CTAX
 
 
 ### CLEAN UP
-rm(EMRF_CH4, EMRF_N2O, CCH4, CN2O, PROD, CONS, GCH4, GN2O, TCH4, TN2O)
+rm(EMRF_CH4, EMRF_N2O, CCH4, CN2O, PROD, FOOD, GCH4, GN2O, TCH4, TN2O)

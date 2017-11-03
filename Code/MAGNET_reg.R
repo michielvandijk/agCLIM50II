@@ -43,34 +43,9 @@ NQT <- current.f("NQT", "BaseData_b_view.gdx",  "NQT", lookup_upd_view, "NQT", c
   rename(unit = NUTRIENTS) %>%
   filter(unit == "CAL")
 
-# ECO2
-ECO2 <- current.f("ECO2", "BaseData_b.gdx",  "QGHGX_GAS", lookup_upd, "DQGHGX", c("GHG", "FUELX", "FUELUSER", "REG"), c("GHG", "REG")) %>%
-  filter(GHG == "CO2") %>%
-  mutate(unit = "MtCO2e") %>%
-  dplyr::select(-GHG)
-
-# EN2O
-EN2O <- current.f("EN2O", "BaseData_b.gdx",  "QGHGX_GAS", lookup_upd, "DQGHGX", c("GHG", "FUELX", "FUELUSER", "REG"), c("GHG", "REG")) %>%
-  filter(GHG == "N2O") %>%
-  mutate(unit = "MtCO2e") %>%
-  dplyr::select(-GHG)
-
-# ECO2
-ECH4 <- current.f("ECH4", "BaseData_b.gdx",  "QGHGX_GAS", lookup_upd, "DQGHGX", c("GHG", "FUELX", "FUELUSER", "REG"), c("GHG", "REG")) %>%
-  filter(GHG == "CH4") %>%
-  mutate(unit = "MtCO2e") %>%
-  dplyr::select(-GHG)
-
-# EMIS
-EMIS <- bind_rows(EN2O, ECO2, ECH4) %>%
-  group_by(REG, scenario, year, unit) %>%
-  summarize(value = sum(value, na.rm = T)) %>%
-  mutate(variable = "EMIS")
-
-
 ### COMBINE
-MAGNET_reg <- bind_rows(GDPT, POPT, GDPval, NQT, ECH4, ECO2, EN2O, EMIS)
+MAGNET_reg <- bind_rows(GDPT, POPT, GDPval, NQT)
 
   
 ## CLEAN UP
-rm(GDPT, POPT, GDPval, NQT, ECH4, ECO2, EN2O, EMIS)
+rm(GDPT, POPT, GDPval, NQT)

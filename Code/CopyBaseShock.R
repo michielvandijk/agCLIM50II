@@ -6,7 +6,7 @@
 # Below some raw code to do this (unfinished)# 
 
 
-modelPath <- "D:/Tabeau/AgCLim50_2"
+modelPath <- "D:/Tabeau/AgCLim50_2_v2"
 
 dataUpdatesPath <- paste(modelPath, "Updates", sep ="/")
 dataSolPath <- paste(modelPath, "Solutions", sep ="/")
@@ -35,9 +35,9 @@ lookup_base <- lookup_base %>%
                        baseResultFile = paste(paste(scenario, period, fileType, sep="_"), ext, sep=""))
 
 # Copy sol files 
-solCopy <- filter(lookup_base, fileType == "Solution")
+solCopy <- dplyr::filter(lookup_base, fileType == "Solution")
 file.copy(file.path(dataSolPath, solCopy$baseSourceFile), file.path(dataSolPath, solCopy$baseResultFile), overwrite =T)
 
 # Copy update and update view files 
-updCopy <- filter(lookup_base, fileType %in% c("update", "update_view"))
+updCopy <- dplyr::filter(lookup_base, fileType %in% c("update", "update_view"))
 file.copy(file.path(dataUpdatesPath, updCopy$baseSourceFile), file.path(dataUpdatesPath, updCopy$baseResultFile), overwrite =T)

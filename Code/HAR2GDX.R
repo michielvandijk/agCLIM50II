@@ -21,7 +21,7 @@ igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
 
 # Set working folder
-wdPath <- "D:/Tabeau/AgCLim50_2"
+wdPath <- "D:/Tabeau/AgCLim50_2_v2"
 setwd(wdPath)  
 
 # FUNCTIONS

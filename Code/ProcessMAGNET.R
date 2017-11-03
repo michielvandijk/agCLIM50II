@@ -38,7 +38,7 @@ igdx(GAMSPath)
 wdPath <- "D:\\R\\agCLIM50II"
 setwd(wdPath)  
 
-dataPath <- "D:\\Tabeau\\AgCLim50_2"
+dataPath <- "D:\\Tabeau\\AgCLim50_2_v2"
 dataResultPath <- "D:\\Tabeau\\AgCLim50_2\\Results"
 
 ### R SETTINGS
@@ -302,11 +302,15 @@ MAGNET1_raw[["FOOD"]] <- FOOD; rm(FOOD)
 MAGNET1_raw[["OTHU"]] <- OTHU; rm(OTHU)
 
 
+### Emissions
+source("Code/emissions.R")
+
+
 #####################
 ### COMBINE DATA ###
 ####################
 
-MAGNET1 <- bind_rows(MAGNET1_raw) %>%
+MAGNET1 <- bind_rows(MAGNET1_raw, emissions) %>%
               ungroup() %>%
               mutate(REG = toupper(REG)) # REG in capitals for mapping
 
@@ -359,6 +363,7 @@ MAGNET3_raw <- list()
 
 ### Emissions AgCLIM50II
 source("Code/Emissions_AgClim50II.R")
+emis_agclim50II <- mutate(emis_agclim50II, REG = toupper(REG))
 
 # Sectoral mappings
 emis_agclim50II <- bind_rows(

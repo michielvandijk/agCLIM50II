@@ -417,4 +417,5 @@ rm(A, C, CONS, EXPO, F1, F2, F2biog, F2cvol, IMPO, PROD, VDFM, VFM, VIFM, X)
 rm(lvs, pa, pf, ser, ac)
 rm(FOOD1, FOOD2, FOOD3, FOOD4, FOOD5)
 rm(FEED1, FEED2, FEED3, FEED4, FEED5)
+rm(AFSH, ANRM, ARUM)
    
