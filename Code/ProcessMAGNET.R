@@ -39,7 +39,7 @@ wdPath <- "D:\\R\\agCLIM50II"
 setwd(wdPath)  
 
 dataPath <- "D:\\Tabeau\\AgCLim50_2_v2"
-dataResultPath <- "D:\\Tabeau\\AgCLim50_2\\Results"
+dataResultPath <- "D:\\Tabeau\\AgCLim50_2_v2\\Results"
 
 ### R SETTINGS
 options(scipen=999) # surpress scientific notation
