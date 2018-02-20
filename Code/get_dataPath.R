@@ -17,14 +17,13 @@ if(Sys.info()["user"] == "dijk158") {
   dataPath <- "D:\\R\\agCLIM50II"}
 
 if(Sys.info()["user"] == "dijk158") {
-  GAMSPath <- "C:\\24.4"}
+  GAMSPath <- "C:\\24.9"}
 
 
 
 # Michiel IIASA
 if(Sys.info()["user"] == "vandijkm") {
-  dataPath <- "NONE"}
+  dataPath <- "C:/Users/vandijkm/Dropbox/AgClim50 scenario results/AgMIP  Phase 2 output (restricted access)"}
 
-# Anybody else:
-if(Sys.info()["user"] == "") {
-  dataPath <- ""}
+if(Sys.info()["user"] == "vandijkm") {
+  GAMSPath <- "C:/GAMS/win64/24.9"}
