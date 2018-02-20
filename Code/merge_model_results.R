@@ -35,12 +35,12 @@ igdx(GAMSPath)
 
 
 ### LOAD REPORTING TEMPLATE
-temp <- read_excel(file.path(dataPath, "Reporting/Reporting_template_AGMIP_AgCLIM_Jul2016_v3.xlsx"), sheet = "Listing_template")
+temp <- read_excel(file.path(dataPath, "Reporting/Reporting_template_AGMIP_Jan2017_v3.1_Jul17_AGCLIM52.xlsx"), sheet = "Listing_template")
 
 
 ### GLOBIOM
 # Process
-GLOBIOM <- read_csv(file.path(dataPath, "Results\\agclim50_GLOBIOM_mtg_agmip_07072017_v2.csv"), col_names = F) %>%
+GLOBIOM <- read_csv(file.path(dataPath, "Results\\agclim50_GLOBIOM_mtg_agmip_12022018.csv"), col_names = F) %>%
   setNames(c("model", "scenario", "region", "item", "variable", "unit", "year", "value")) %>%
   mutate_all(funs(gsub("\'", "", .))) %>%
   mutate(value = as.numeric(value),
@@ -75,7 +75,7 @@ rm(check2010)
 
 ### IMAGE
 # Process
-IMAGE <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_02102017.csv")) %>%
+IMAGE <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_19022018.csv")) %>%
   rename(model = Model, scenario = Scenario, region = Region, item = Item, unit = Unit, variable = Variable, year = Year, value = Value) %>%
   mutate(year = as.numeric(year))
 
@@ -97,7 +97,7 @@ rm(check2010)
 
 
 ### MAGNET
-MAGNET <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2017-11-04.csv"))
+MAGNET <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-02-20.csv"))
 
 ### REPLACE 2011 with 2010 values?
 MAGNET <- MAGNET %>%
@@ -128,10 +128,16 @@ rm(check2010)
 
 
 ### CAPRI
-CAPRI <- read_csv(file.path(dataPath, "Results/171025_AGCLIM50-2_CAPRI_results.csv")) %>%
-  setNames(c("region", "variable", "item", "year", "scenario", "value")) %>%
-  mutate(model = "CAPRI",
-         unit = NA) %>%
+#CAPRI <- read_csv(file.path(dataPath, "Results/AgMip_CAPRI_results_20180219.csv")) %>%
+#setNames(c("region", "variable", "item", "year", "scenario", "value")) %>%
+# mutate(model = "CAPRI",
+# unit = NA) %>%
+#   filter(region %in% temp$Region[!is.na(temp$Region)])
+
+CAPRI <- read_excel(file.path(dataPath, "Results/AgMip_CAPRI_results_20180219.xlsx")) %>%
+  rename(model = Model, scenario = Scenario, region = Region, item = Item, variable = Variable, year = Year, value = Value) %>%
+  mutate(unit = NA,
+         year = as.integer(year)) %>%
   filter(region %in% temp$Region[!is.na(temp$Region)])
 
 # Remove CAPRI baseline
@@ -139,8 +145,8 @@ CAPRI <- filter(CAPRI, scenario != "BASELINE")
 
 # Check if there are variables with missing information for 2010
 check2010 <- CAPRI %>%
-  arrange(model, scenario, region, item, variable, unit, year) %>%
-  group_by(model, scenario, region, item, variable, unit) %>%
+  arrange(model, scenario, region, item, variable, year) %>%
+  group_by(model, scenario, region, item, variable) %>%
   filter(!any(year==2010))
 
 # Remove series with missing values in 2010
@@ -162,7 +168,8 @@ rm(check2010)
 
 
 # Bind in one file
-total <- bind_rows(MAGNET, GLOBIOM, IMAGE, CAPRI) %>% 
+#total <- bind_rows(MAGNET, GLOBIOM, IMAGE, CAPRI) %>% 
+total <- bind_rows(MAGNET, GLOBIOM, IMAGE) %>% 
               filter(year>=2010)
 
 # Calculate index
