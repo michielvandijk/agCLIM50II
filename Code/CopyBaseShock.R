@@ -6,7 +6,7 @@
 # Below some raw code to do this (unfinished)# 
 
 
-modelPath <- "D:/Tabeau/AgCLim50_2_v2"
+modelPath <- "D:/Tabeau/AgCLim50_2_v3"
 
 dataUpdatesPath <- paste(modelPath, "Updates", sep ="/")
 dataSolPath <- paste(modelPath, "Solutions", sep ="/")

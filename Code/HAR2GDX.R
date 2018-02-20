@@ -10,7 +10,7 @@
 #             - Adding user defined region concordance to make user defined aggregations
 
 # PACKAGES
-BasePackages <-c("readr", "readxl", "stringr", "car", "zoo", "tidyr", "RColorBrewer", "plyr", "dplyr", "ggplot2", "haven")
+BasePackages <-c("readr", "readxl", "stringr", "zoo", "tidyr", "RColorBrewer", "plyr", "dplyr", "ggplot2", "haven")
 lapply(BasePackages,library,character.only=TRUE)
 AdditionalPackages <-c("gdxrrw")
 lapply(AdditionalPackages,library, character.only=TRUE)
@@ -21,7 +21,7 @@ igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
 
 # Set working folder
-wdPath <- "D:/Tabeau/AgCLim50_2_v2"
+wdPath <- "D:/Tabeau/AgCLim50_2_v3"
 setwd(wdPath)  
 
 # FUNCTIONS
@@ -50,7 +50,9 @@ if (!file.exists(dataResultPath)) dir.create(dataResultPath)
 
 # Define scenarios, periods and project
 scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2_C750", "GDPEndoSSP2_C1000",
-             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500")
+             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500", 
+             "GDPEndoSSP2D", "GDPEndoSSP2DT", "GDPEndoSSP2_C250D", "GDPEndoSSP2_C500D", "GDPEndoSSP2_C750D", "GDPEndoSSP2_C1000D",
+             "GDPEndoSSP2_C1250D", "GDPEndoSSP2_C2500D")
 periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070")
 
 # Create lookup table for update files

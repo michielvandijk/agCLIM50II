@@ -38,8 +38,8 @@ igdx(GAMSPath)
 wdPath <- "D:\\R\\agCLIM50II"
 setwd(wdPath)  
 
-dataPath <- "D:\\Tabeau\\AgCLim50_2_v2"
-dataResultPath <- "D:\\Tabeau\\AgCLim50_2_v2\\Results"
+dataPath <- "D:\\Tabeau\\AgCLim50_2_v3"
+dataResultPath <- "D:\\Tabeau\\AgCLim50_2_v3\\Results"
 
 ### R SETTINGS
 options(scipen=999) # surpress scientific notation
@@ -48,7 +48,9 @@ options(digits=4)
 
 ### Define scenarios, periods, path, project, sourcefile and 
 scenarios<-c("GDPEndoSSP2", "GDPEndoSSP2_C250", "GDPEndoSSP2_C500", "GDPEndoSSP2_C750", "GDPEndoSSP2_C1000",
-             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500")
+             "GDPEndoSSP2_C1250", "GDPEndoSSP2_C2500", 
+             "GDPEndoSSP2D", "GDPEndoSSP2DT", "GDPEndoSSP2_C250D", "GDPEndoSSP2_C500D", "GDPEndoSSP2_C750D", "GDPEndoSSP2_C1000D",
+             "GDPEndoSSP2_C1250D", "GDPEndoSSP2_C2500D")
 
 periods<-c("2011-2015", "2015-2020", "2020-2030", "2030-2040", "2040-2050", "2050-2060", "2060-2070")
 
@@ -302,7 +304,7 @@ MAGNET1_raw[["FOOD"]] <- FOOD; rm(FOOD)
 MAGNET1_raw[["OTHU"]] <- OTHU; rm(OTHU)
 
 
-### Emissions
+### Standard emissions
 source("Code/emissions.R")
 
 
