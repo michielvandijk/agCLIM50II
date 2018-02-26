@@ -75,7 +75,7 @@ rm(check2010)
 
 ### IMAGE
 # Process
-IMAGE <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_19022018.csv")) %>%
+IMAGE <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_20022018.csv")) %>%
   rename(model = Model, scenario = Scenario, region = Region, item = Item, unit = Unit, variable = Variable, year = Year, value = Value) %>%
   mutate(year = as.numeric(year))
 
@@ -128,20 +128,14 @@ rm(check2010)
 
 
 ### CAPRI
-#CAPRI <- read_csv(file.path(dataPath, "Results/AgMip_CAPRI_results_20180219.csv")) %>%
-#setNames(c("region", "variable", "item", "year", "scenario", "value")) %>%
-# mutate(model = "CAPRI",
-# unit = NA) %>%
-#   filter(region %in% temp$Region[!is.na(temp$Region)])
+# Scenario list
+capri_scenario_list <- read_csv(file.path(dataPath, "Results/capri_scenario_list.csv"))
 
-CAPRI <- read_excel(file.path(dataPath, "Results/AgMip_CAPRI_results_20180219.xlsx")) %>%
-  rename(model = Model, scenario = Scenario, region = Region, item = Item, variable = Variable, year = Year, value = Value) %>%
-  mutate(unit = NA,
-         year = as.integer(year)) %>%
-  filter(region %in% temp$Region[!is.na(temp$Region)])
-
-# Remove CAPRI baseline
-CAPRI <- filter(CAPRI, scenario != "BASELINE")
+CAPRI <- read_delim(file.path(dataPath, "Results/AgMip_CAPRI_results_20180225.csv"), delim = ";") %>%
+  setNames(c("model", "scenario_capri", "region", "item", "variable", "year", "unit", "value")) %>%
+  filter(region %in% temp$Region[!is.na(temp$Region)]) %>%
+  left_join(capri_scenario_list) %>%
+  dplyr::select(-scenario_capri)
 
 # Check if there are variables with missing information for 2010
 check2010 <- CAPRI %>%
@@ -168,8 +162,7 @@ rm(check2010)
 
 
 # Bind in one file
-#total <- bind_rows(MAGNET, GLOBIOM, IMAGE, CAPRI) %>% 
-total <- bind_rows(MAGNET, GLOBIOM, IMAGE) %>% 
+total <- bind_rows(MAGNET, GLOBIOM, IMAGE, CAPRI) %>% 
               filter(year>=2010)
 
 # Calculate index

@@ -14,10 +14,10 @@
 
 # Michiel WEcR
 if(Sys.info()["user"] == "dijk158") {
-  dataPath <- "D:\\R\\agCLIM50II"}
+  dataPath <- "C:\\Users\\dijk158\\Dropbox\\AgClim50 scenario results\\AgMIP  Phase 2 output (restricted access)"}
 
 if(Sys.info()["user"] == "dijk158") {
-  GAMSPath <- "C:\\24.9"}
+  GAMSPath <- "C:\\Program Files\\GAMS\\win64\\24.6"}
 
 
 
