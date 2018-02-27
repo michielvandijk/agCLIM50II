@@ -575,8 +575,9 @@ rm(VFM, GDPdef, VFMval, VFMvol)
 
 
 ### CALORIE AVAILABILITY PER CAPITA
+# NB: variable NQT is not necessary as we also calculate total cal by the sum of all regions (better to check this)
 NQT <- MAGNET1_2 %>%
-  filter(variable %in% c("NQT", "NQSECT")) %>%
+  filter(variable %in% c("NQSECT")) %>%
   select(-unit)
 
 

@@ -2,7 +2,7 @@ TRAD_COMM,sec,crp,agr,agr_prim,tot,lsp,Note
 grain,CGR,CRP,AGR,AGR,TOT,,
 milk,DRY,LSP,AGR,AGR,TOT,LSP,
 frs,FOR,,,,TOT,,
-fish,FSH,,,,TOT,,
+fsh,FSH,,,,TOT,,
 pigpoul,NRM,LSP,AGR,AGR,TOT,LSP,"Mapped to NRM, where is OAP"
 oils,OSD,CRP,AGR,AGR,TOT,,
 crops,PFB,CRP,AGR,AGR,TOT,,
