@@ -14,17 +14,16 @@
 
 # Michiel WEcR
 if(Sys.info()["user"] == "dijk158") {
-  dataPath <- "D:\\R\\agCLIM50II"}
+  dataPath <- "C:\\Users\\dijk158\\Dropbox\\AgClim50 scenario results\\AgMIP  Phase 2 output (restricted access)"}
 
 if(Sys.info()["user"] == "dijk158") {
-  GAMSPath <- "C:\\24.4"}
+  GAMSPath <- "C:\\Program Files\\GAMS\\win64\\24.6"}
 
 
 
 # Michiel IIASA
 if(Sys.info()["user"] == "vandijkm") {
-  dataPath <- "NONE"}
+  dataPath <- "C:/Users/vandijkm/Dropbox/AgClim50 scenario results/AgMIP  Phase 2 output (restricted access)"}
 
-# Anybody else:
-if(Sys.info()["user"] == "") {
-  dataPath <- ""}
+if(Sys.info()["user"] == "vandijkm") {
+  GAMSPath <- "C:/GAMS/win64/24.9"}
