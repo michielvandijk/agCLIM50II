@@ -83,24 +83,43 @@ CCH4 <- bind_rows(GCH4, PROD) %>%
 
   
 ### EMRF_CH4
-EMRF_CH4 <- rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
+EMRF_CH4 <- bind_rows(
+  rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
                    names = c("CtaxTar", "year", "GHG", "FUELX", "TRAD_COMM", "REG", "EMRF"), compres = T) %>%
   filter((GHG =="CH4" & FUELX == "Act" & TRAD_COMM %in% sec1)) %>%
   mutate(year = as.character(gsub("Y", "", year)),
          scenario = paste0("GDPEndoSSP2_", CtaxTar),
          scenario = gsub("tax", "", scenario)) %>%
-  dplyr::select(-CtaxTar, -FUELX, -GHG)
+  dplyr::select(-CtaxTar, -FUELX, -GHG),
+  rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
+             names = c("CtaxTar", "year", "GHG", "FUELX", "TRAD_COMM", "REG", "EMRF"), compres = T) %>%
+    filter((GHG =="CH4" & FUELX == "Act" & TRAD_COMM %in% sec1)) %>%
+    mutate(year = as.character(gsub("Y", "", year)),
+           scenario = paste0("GDPEndoSSP2_", CtaxTar, "D"),
+           scenario = gsub("tax", "", scenario)) %>%
+    dplyr::select(-CtaxTar, -FUELX, -GHG)
+)
 
 
 # EMRF_N2O
-EMRF_N2O <- rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
+EMRF_N2O <- bind_rows(
+  rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
                        names = c("CtaxTar", "year", "GHG", "FUELX", "TRAD_COMM", "REG", "EMRF"), compres = T) %>%
   filter((GHG == "N2O" & FUELX == "Act"& TRAD_COMM %in% sec3) |
            (GHG == "N2O" & FUELX == "fert" & TRAD_COMM %in% sec2)) %>%
   mutate(year = as.character(gsub("Y", "", year)),
          scenario = paste0("GDPEndoSSP2_", CtaxTar),
          scenario = gsub("tax", "", scenario)) %>%
-  dplyr::select(-CtaxTar, -FUELX, -GHG)
+  dplyr::select(-CtaxTar, -FUELX, -GHG),
+  rgdx.param(file.path(dataResultPath, "Emissions_Reduct_Tax.gdx"), "OLDEMRD", 
+             names = c("CtaxTar", "year", "GHG", "FUELX", "TRAD_COMM", "REG", "EMRF"), compres = T) %>%
+    filter((GHG == "N2O" & FUELX == "Act"& TRAD_COMM %in% sec3) |
+             (GHG == "N2O" & FUELX == "fert" & TRAD_COMM %in% sec2)) %>%
+    mutate(year = as.character(gsub("Y", "", year)),
+           scenario = paste0("GDPEndoSSP2_", CtaxTar, "D"),
+           scenario = gsub("tax", "", scenario)) %>%
+    dplyr::select(-CtaxTar, -FUELX, -GHG)
+)
 
 
 ### TCH4 
