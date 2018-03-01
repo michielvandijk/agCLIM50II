@@ -169,9 +169,26 @@ levelplot2_f <- function(df, id_sel){
   p
 }
 
-lapply(sel, function(x) levelplot2_f(total_wld2, x))[10]
+lapply(sel, function(x) levelplot2_f(total_wld2, x))
 
 
+levelplot3_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot() +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_line(data = df, aes(x = year, y = value, linetype = model, colour = model)) + 
+    geom_point(data = df, aes(x = year, y = value, shape = model, colour = model)) +
+    facet_grid(diet~c_price) +
+    ggtitle(title) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(y = paste(unique(df$unit), collapse = "___")) +
+    theme_bw()
+  p
+}
+
+lapply(sel, function(x) levelplot3_f(total_wld2, x))
 
 
 ### GDP AND POP PLOTS
