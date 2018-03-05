@@ -423,12 +423,12 @@ aland <- aland2.f("aland", "aland", c("PROD_SECT", "MREG")) %>%
   select(-variable)  %>%
   mutate(year = as.character(year))
 
-
+# NB YEAR HARD CODED!!!
 AREA <- current.f("AREA", "BaseData_b.gdx", "LTYPEDEM", lookup_upd, "LDEM", c("PROD_SECT", "ENDWL_COMM", "REG"), c("PROD_SECT", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT,
          AREA = value) %>% 
   select(-variable) %>%
-  filter(year == 2007) %>%
+  filter(year == 2011) %>%
   select(-year)
 
 YEXO_raw <- left_join(aland, AREA) %>%
