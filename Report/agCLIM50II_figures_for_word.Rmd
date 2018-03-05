@@ -118,7 +118,7 @@ barplot3_f <- function(df, id_sel){
 
 ### CREATE WLD DATABASE FOR LEVEL PLOT
 # Create database for plotting
-sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS")
+sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS", "YEXO_CRP/TOT/LSP for baseline", "CALO_LSP/CRP/TOT", "CALO for all regions (14) for base and base-D")
 total_wld2 <- filter(total, id %in% sel, region == "WLD")
 
 # Check units x variables
