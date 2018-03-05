@@ -1,0 +1,204 @@
+---
+title: "Comparison of model results for agCLIM50II"
+author: "Michiel van Dijk"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(readr)
+library(ggplot2)
+library(tidyverse)
+library(forcats)
+library(rprojroot)
+library(stringr)
+
+### SET ROOT AND WORKING DIRECTORY
+root <- find_root(is_rstudio_project)
+setwd(root)
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  fig.width=7, fig.height=5,
+  #dpi = 300,
+  echo=FALSE, warning=FALSE, message=FALSE,
+  fig.path = file.path(root,"Fig_tab_map/out-"))
+
+### SET DATAPATH
+source(file.path(root, "code/get_dataPath.r"))
+
+
+### LOAD DATA
+total_raw <- read.csv(file.path(dataPath, "Results/agclim50II_total_2018-03-01.csv")) 
+
+
+### PROCESS DATA
+# Remove DT scenario (only MAGNET and IMAGE), order scenarios etc.
+total <- total_raw %>%
+  filter(scenario != "SSP2_baseDT") %>%
+  mutate(scenario = forcats::fct_relevel(scenario,
+                                         c("SSP2_base", "SSP2_baseD", "SSP2_CP1000", "SSP2_CP1000D",
+                                           "SSP2_CP1250",  "SSP2_CP1250D", "SSP2_CP250", "SSP2_CP2500",
+                                           "SSP2_CP2500D", "SSP2_CP250D", "SSP2_CP500", "SSP2_CP500D",  
+                                           "SSP2_CP750", "SSP2_CP750D"))) %>%
+  separate(scenario, c("SSP", "c_price"), "_", remove = F) %>%
+  mutate(scenario_check = str_sub(scenario, start= -1),
+         diet = ifelse(scenario_check == "D", "diet", "no_diet"),
+         id = paste(item, variable, sep ="_"),
+         diff = (index - 1)*100,
+         c_price = factor(gsub("D", "", c_price), levels = c("base", "CP250", "CP500", "CP750", "CP1000", "CP1250", "CP2500"))) %>%
+         dplyr::select(-scenario_check)
+
+# Create df with only wld 
+
+
+### CREATE WLD DATABASE FOR RELEVANT VARIABLES
+# Create database for plotting
+sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS")
+total_wld <- filter(total, id %in% sel, region == "WLD", year == 2050)
+
+# Check units x variables
+xtabs(~ unit + variable + model, data = total_wld)
+
+# filter out mn USD  which is only presented in MAGNET
+total_wld <- filter(total_wld, (!(unit == "mn USD" & model == "MAGNET") &
+                                  !(unit == "1000 t" & model == "GLOBIOM")))
+
+
+### BARPLOTS WITH GROWTH
+# bar plot with models on x-axis
+barplot_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot(data = df, aes(x = model, y = diff, shape = model, colour = diet)) +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_point() + 
+    facet_grid(~c_price) +
+    ggtitle(title) +
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  p
+}
+
+
+# Barplot with diet on the x-axis
+barplot2_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot(data = df, aes(x = diet, y = diff, shape = model, colour = model)) +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_point() + 
+    facet_grid(~c_price) +
+    ggtitle(title) +
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  p
+}
+
+# Barplot with scenario on the x-axis
+barplot3_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot(data = df, aes(x = c_price, y = diff, shape = model, colour = model)) +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_point() + 
+    facet_grid(~diet) +
+    ggtitle(title) +
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  p
+}
+
+### CREATE WLD DATABASE FOR LEVEL PLOT
+# Create database for plotting
+sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS", "YEXO_CRP/TOT/LSP for baseline", "CALO_LSP/CRP/TOT", "CALO for all regions (14) for base and base-D")
+total_wld2 <- filter(total, id %in% sel, region == "WLD")
+
+# Check units x variables
+xtabs(~ unit + variable + model, data = total_wld2)
+
+# filter out duplicate unit-variable combinations
+total_wld2 <- filter(total_wld2, (!(unit == "mn USD" & model == "MAGNET") &
+                       !(unit == "1000 t" & model == "GLOBIOM")))
+
+unique(total_wld2$unit)
+
+# levelplot by diet
+levelplot_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot() +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_line(data = df, aes(x = year, y = value, linetype = model, colour = c_price)) + 
+    geom_point(data = df, aes(x = year, y = value, shape = model, colour = c_price)) +
+    facet_grid(~diet) +
+    ggtitle(title) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(y = paste(unique(df$unit), collapse = "___")) +
+    theme_bw()
+  p
+}
+
+
+# levelplot by diet
+levelplot2_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot() +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_line(data = df, aes(x = year, y = value, linetype = diet, colour = model)) + 
+    geom_point(data = df, aes(x = year, y = value, shape = model, colour = model)) +
+    facet_grid(~c_price) +
+    ggtitle(title) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(y = paste(unique(df$unit), collapse = "___")) +
+    theme_bw()
+  p
+}
+
+
+levelplot3_f <- function(df, id_sel){
+  df <- filter(df, id == id_sel)
+  title <- paste(df$variable, df$item, sep = "_")
+  p = ggplot() +
+    #scale_fill_manual(values = colour) +
+    #geom_bar(stat="identity", colour = "black") + 
+    geom_line(data = df, aes(x = year, y = value, linetype = model, colour = model)) + 
+    geom_point(data = df, aes(x = year, y = value, shape = model, colour = model)) +
+    facet_grid(diet~c_price) +
+    ggtitle(title) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    labs(y = paste(unique(df$unit), collapse = "___")) +
+    theme_bw()
+  p
+}
+
+```
+
+```{r barplots}
+lapply(sel, function(x) barplot_f(total_wld, x))
+lapply(sel, function(x) barplot3_f(total_wld, x))
+lapply(sel, function(x) barplot2_f(total_wld, x))
+
+```
+
+
+```{r levelplots}
+lapply(sel, function(x) levelplot_f(total_wld2, x))
+lapply(sel, function(x) levelplot2_f(total_wld2, x))
+lapply(sel, function(x) levelplot3_f(total_wld2, x))
+
+```
+
+
+
+

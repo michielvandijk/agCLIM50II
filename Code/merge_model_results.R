@@ -33,14 +33,16 @@ options(digits=4)
 ### load required GAMS libraries (folder user specific)
 igdx(GAMSPath)
 
+### SOURCE
+source(file.path(root, "code/R2GDX.r"))
 
-### LOAD REPORTING TEMPLATE
+### LOAD DATA
+# Template
 temp <- read_excel(file.path(dataPath, "Reporting/Reporting_template_AGMIP_Jan2017_v3.1_Jul17_AGCLIM52.xlsx"), sheet = "Listing_template")
 
 
 ### GLOBIOM
-# Process
-GLOBIOM <- read_csv(file.path(dataPath, "Results\\agclim50_GLOBIOM_mtg_agmip_12022018.csv"), col_names = F) %>%
+GLOBIOM_raw <- read_csv(file.path(dataPath, "Results\\agclim50_GLOBIOM_mtg_agmip_12022018_v2.csv"), col_names = F) %>%
   setNames(c("model", "scenario", "region", "item", "variable", "unit", "year", "value")) %>%
   mutate_all(funs(gsub("\'", "", .))) %>%
   mutate(value = as.numeric(value),
@@ -50,13 +52,13 @@ GLOBIOM <- read_csv(file.path(dataPath, "Results\\agclim50_GLOBIOM_mtg_agmip_120
 
 # Check if there are variables with missing information for 2010
 # Missing values are in fact zero but these are filtered out by GAMS
-check2010 <- GLOBIOM %>%
+check2010 <- GLOBIOM_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, variable, unit) %>%
   filter(!any(year==2010))
 
 # Remove series with missing values in 2010
-GLOBIOM <- GLOBIOM %>%
+GLOBIOM <- GLOBIOM_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, unit, variable) %>%
   filter(any(year==2010)) %>%
@@ -75,15 +77,22 @@ rm(check2010)
 
 ### IMAGE
 # Process
-IMAGE <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_20022018.csv")) %>%
-  rename(model = Model, scenario = Scenario, region = Region, item = Item, unit = Unit, variable = Variable, year = Year, value = Value) %>%
+IMAGE_raw <- read_csv(file.path(dataPath, "Results/AGCLIM50-II_IMAGE_AGMIP_01032018.csv")) %>%
+  dplyr::rename(model = Model, scenario = Scenario, region = Region, item = Item, unit = Unit, variable = Variable, year = Year, value = Value) %>%
   mutate(year = as.numeric(year))
 
 # Check if there are variables with missing information for 2010
-check2010 <- IMAGE %>%
+check2010 <- IMAGE_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, variable, unit) %>%
   filter(!any(year==2010))
+
+# Remove series with missing values in 2010
+IMAGE <- IMAGE_raw %>%
+  arrange(model, scenario, region, item, variable, unit, year) %>%
+  group_by(model, scenario, region, item, unit, variable) %>%
+  filter(any(year==2010)) %>%
+  ungroup()
 
 # Check
 summary(IMAGE)
@@ -97,20 +106,20 @@ rm(check2010)
 
 
 ### MAGNET
-MAGNET <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-02-20.csv"))
+MAGNET_raw <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-02-28.csv"))
 
-### REPLACE 2011 with 2010 values?
-MAGNET <- MAGNET %>%
-  mutate(year = ifelse(year == 2011, 2010, year))
+### REPLACE 2011 with 2010 values 
+MAGNET_raw <- MAGNET_raw %>%
+  mutate(year = ifelse(year == 2011, 2010, year)) 
 
 # Check if there are variables with missing information for 2010
-check2010 <- MAGNET %>%
+check2010 <- MAGNET_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, variable, unit) %>%
   filter(!any(year==2010))
 
 # Remove series with missing values in 2010
-MAGNET <- MAGNET %>%
+MAGNET <- MAGNET_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, unit, variable) %>%
   filter(any(year==2010)) %>%
@@ -131,20 +140,20 @@ rm(check2010)
 # Scenario list
 capri_scenario_list <- read_csv(file.path(dataPath, "Results/capri_scenario_list.csv"))
 
-CAPRI <- read_delim(file.path(dataPath, "Results/AgMip_CAPRI_results_20180225.csv"), delim = ";") %>%
+CAPRI_raw <- read_delim(file.path(dataPath, "Results/AgMip_CAPRI_results_20180228.csv"), delim = ";") %>%
   setNames(c("model", "scenario_capri", "region", "item", "variable", "year", "unit", "value")) %>%
   filter(region %in% temp$Region[!is.na(temp$Region)]) %>%
   left_join(capri_scenario_list) %>%
   dplyr::select(-scenario_capri)
 
 # Check if there are variables with missing information for 2010
-check2010 <- CAPRI %>%
+check2010 <- CAPRI_raw %>%
   arrange(model, scenario, region, item, variable, year) %>%
   group_by(model, scenario, region, item, variable) %>%
   filter(!any(year==2010))
 
 # Remove series with missing values in 2010
-CAPRI <- CAPRI %>%
+CAPRI <- CAPRI_raw %>%
   arrange(model, scenario, region, item, variable, unit, year) %>%
   group_by(model, scenario, region, item, unit, variable) %>%
   filter(any(year==2010)) %>% 
@@ -161,9 +170,21 @@ xtabs(~variable + unit, data = CAPRI)
 rm(check2010)
 
 
+### RAW FILE FOR GAMS PROCESSING
+total_gams <- bind_rows(GLOBIOM_raw, MAGNET_raw, IMAGE_raw, CAPRI_raw) %>%
+  ungroup()
+
+total_gams_gdx <- para_gdx(total_gams, c("model", "scenario", "region", "item",
+                                         "variable", "year", "unit"), "agclim50II", "data")
+
+wgdx(paste0("I:/frank/agclim50II_total_gams_format_", Sys.Date(), ".gdx"), total_gams_gdx)
+
+
+### CLEANED FILE FOR PLOTTING
 # Bind in one file
 total <- bind_rows(MAGNET, GLOBIOM, IMAGE, CAPRI) %>% 
-              filter(year>=2010)
+              filter(year>=2010) %>% 
+  ungroup()
 
 # Calculate index
 total <- total %>%
@@ -200,5 +221,7 @@ xtabs(~variable + model, data = total)
 xtabs(~region + model, data = total)
 xtabs(~scenario + model, data = total)
 
-# Save data
+
+### SAVE DATA
+# csv
 write_csv(total, file.path(dataPath, paste0("Results\\agclim50II_total_", Sys.Date(), ".csv")))
