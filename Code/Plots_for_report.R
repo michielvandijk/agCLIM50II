@@ -56,7 +56,7 @@ total <- total_raw %>%
 # Create database for plotting
 sel <- c("PROD_AGR", "PROD_CRP", "PROD_LSP", "AREA_CRP", "AREA_LSP", "XPRP_AGR", "XPRP_CRP", "XPRP_LSP",
          "ECH4_AGR", "EN2O_AGR", "EMIS_AGR", "EMIS_CRP", "EMIS_LSP", "GDPT_TOT", "POPT_TOT", "YEXO_CRP", 
-         "LYXO_LSP")
+         "LYXO_LSP", "CALO_TOT")
 
 # Check units x variables
 xtabs(~ unit + variable + model, data = filter(total, model == "GLOBIOM"))
@@ -66,6 +66,7 @@ xtabs(~ variable + model, data = total)
 total <- filter(total, (!(unit == "mn USD" & model == "MAGNET") &
                                   !(unit == "1000 t" & model == "GLOBIOM") &
                                   !(unit == "fm t/ha" & variable == "YEXO" & model == "GLOBIOM")))
+regions <- unique(total$region)
 
 
 ### BARPLOTS WITH GROWTH
@@ -84,8 +85,6 @@ barplot_f <- function(df, id_sel, reg = "WLD", yr = 2050){
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
-
-regions <- unique(total$region)
 
 #lapply(sel, function(x) barplot_f(total, x))
 
@@ -164,7 +163,8 @@ levelplot2_f <- function(df, id_sel, reg = "WLD"){
     ggtitle(title) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(y = paste(unique(df$unit), collapse = "___")) +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
 
@@ -183,7 +183,8 @@ levelplot3_f <- function(df, id_sel, reg = "WLD"){
     ggtitle(title) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     labs(y = paste(unique(df$unit), collapse = "___")) +
-    theme_bw()
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
 #lapply(sel, function(x) levelplot3_f(total, x))

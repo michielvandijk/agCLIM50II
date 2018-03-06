@@ -32,33 +32,33 @@ source(file.path(root, "code/plots_for_report.r"))
 
 ```{r barplots}
 lapply(sel, function(x) barplot_f(total, x))
-map2(c("CALO_AGR"), regions, function(a,b) barplot_f(total, a, b))
-map2(c("CALO_LSP"), regions, function(a,b) barplot_f(total, a, b))
-
 lapply(sel, function(x) barplot3_f(total, x))
-map2(c("CALO_AGR"), regions, function(a,b) barplot2_f(total, a, b))
-map2(c("CALO_LSP"), regions, function(a,b) barplot2_f(total, a, b))
-
 lapply(sel, function(x) barplot2_f(total, x))
-map2(c("CALO_AGR"), regions, function(a,b) barplot3_f(total, a, b))
-map2(c("CALO_LSP"), regions, function(a,b) barplot3_f(total, a, b))
-
 
 ```
 
-
 ```{r levelplots}
 lapply(sel, function(x) levelplot_f(total, x))
+lapply(sel, function(x) levelplot2_f(total, x))
+lapply(sel, function(x) levelplot3_f(total, x))
+
+```
+
+```{r calo_extra}
+map2(c("CALO_AGR"), regions, function(a,b) barplot_f(total, a, b))
+map2(c("CALO_LSP"), regions, function(a,b) barplot_f(total, a, b))
+map2(c("CALO_AGR"), regions, function(a,b) barplot2_f(total, a, b))
+map2(c("CALO_LSP"), regions, function(a,b) barplot2_f(total, a, b))
+map2(c("CALO_AGR"), regions, function(a,b) barplot3_f(total, a, b))
+map2(c("CALO_LSP"), regions, function(a,b) barplot3_f(total, a, b))
+
 map2(c("CALO_AGR"), regions, function(a,b) levelplot_f(total, a, b))
 map2(c("CALO_LSP"), regions, function(a,b) levelplot_f(total, a, b))
-
-lapply(sel, function(x) levelplot2_f(total, x))
 map2(c("CALO_AGR"), regions, function(a,b) levelplot2_f(total, a, b))
 map2(c("CALO_LSP"), regions, function(a,b) levelplot2_f(total, a, b))
-
-lapply(sel, function(x) levelplot3_f(total, x))
 map2(c("CALO_AGR"), regions, function(a,b) levelplot3_f(total, a, b))
 map2(c("CALO_LSP"), regions, function(a,b) levelplot3_f(total, a, b))
+
 
 ```
 
