@@ -31,7 +31,7 @@ source(file.path(root, "code/get_dataPath.r"))
 
 
 ### LOAD DATA
-total_raw <- read.csv(file.path(dataPath, "Results/agclim50II_total_2018-03-01.csv")) 
+total_raw <- read.csv(file.path(dataPath, "Results/agclim50II_total_2018-03-06.csv")) 
 
 
 ### PROCESS DATA
@@ -46,96 +46,94 @@ total <- total_raw %>%
   separate(scenario, c("SSP", "c_price"), "_", remove = F) %>%
   mutate(scenario_check = str_sub(scenario, start= -1),
          diet = ifelse(scenario_check == "D", "diet", "no_diet"),
-         id = paste(item, variable, sep ="_"),
+         id = paste(variable, item, sep ="_"),
          diff = (index - 1)*100,
          c_price = factor(gsub("D", "", c_price), levels = c("base", "CP250", "CP500", "CP750", "CP1000", "CP1250", "CP2500"))) %>%
-         dplyr::select(-scenario_check)
-
-# Create df with only wld 
+  dplyr::select(-scenario_check)
 
 
-
-### CREATE WLD DATABASE FOR BAR PLOT
+### CREATE WLD DATABASE FOR RELEVANT VARIABLES
 # Create database for plotting
-sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS")
-total_wld <- filter(total, id %in% sel, region == "WLD", year == 2050)
+sel <- c("PROD_AGR", "PROD_CRP", "PROD_LSP", "AREA_CRP", "AREA_LSP", "XPRP_AGR", "XPRP_CRP", "XPRP_LSP",
+         "ECH4_AGR", "EN2O_AGR", "EMIS_AGR", "EMIS_CRP", "EMIS_LSP", "GDPT_TOT", "POPT_TOT", "YEXO_CRP", 
+         "LYXO_LSP")
 
 # Check units x variables
-xtabs(~ unit + variable + model, data = total_wld)
+xtabs(~ unit + variable + model, data = filter(total, model == "GLOBIOM"))
+xtabs(~ variable + model, data = total)
 
-# filter out mn USD  which is only presented in MAGNET
-total_wld <- filter(total_wld, (!(unit == "mn USD" & model == "MAGNET") &
-                                  !(unit == "1000 t" & model == "GLOBIOM")))
+# filter out some duplicate units
+total <- filter(total, (!(unit == "mn USD" & model == "MAGNET") &
+                                  !(unit == "1000 t" & model == "GLOBIOM") &
+                                  !(unit == "fm t/ha" & variable == "YEXO" & model == "GLOBIOM")))
 
 
 ### BARPLOTS WITH GROWTH
 # bar plot with models on x-axis
-barplot_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+barplot_f <- function(df, id_sel, reg = "WLD", yr = 2050){
+  df <- filter(df, id == id_sel, region == reg, year == yr)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot(data = df, aes(x = model, y = diff, shape = model, colour = diet)) +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
     geom_point() + 
     facet_grid(~c_price) +
     ggtitle(title) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    ylab("2010-2050 growth (%)")
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
-lapply(sel, function(x) barplot_f(total_wld, x))
+
+regions <- unique(total$region)
+
+#lapply(sel, function(x) barplot_f(total, x))
+
 
 # Barplot with diet on the x-axis
-barplot2_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+barplot2_f <- function(df, id_sel, reg = "WLD", yr = 2050){
+  df <- filter(df, id == id_sel, region == reg, year == yr)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot(data = df, aes(x = diet, y = diff, shape = model, colour = model)) +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
     geom_point() + 
     facet_grid(~c_price) +
     ggtitle(title) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    ylab("2010-2050 growth (%)")
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
-lapply(sel, function(x) barplot2_f(total_wld, x))
+
+#lapply(sel, function(x) barplot2_f(total, x))
 
 
 # Barplot with scenario on the x-axis
-barplot3_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+barplot3_f <- function(df, id_sel, reg = "WLD", yr = 2050){
+  df <- filter(df, id == id_sel, region == reg, year == yr)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot(data = df, aes(x = c_price, y = diff, shape = model, colour = model)) +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
     geom_point() + 
     facet_grid(~diet) +
     ggtitle(title) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    ylab("2010-2050 growth (%)")
+    ylab("2010-2050 growth (%)") +
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
   p
 }
-lapply(sel, function(x) barplot3_f(total_wld, x))
 
-### CREATE WLD DATABASE FOR BAR PLOT
-# Create database for plotting
-sel <- c("AGR_PROD", "CRP_AREA", "AGR_XPRP", "LSP_XPRP", "AGR_ECH4", "AGR_EN2O", "TOT_GDPT", "TOT_POPT", "LSP_AREA", "AGR_EMIS")
-total_wld2 <- filter(total, id %in% sel, region == "WLD")
+#lapply(sel, function(x) barplot3_f(total, x))
 
-# Check units x variables
-xtabs(~ unit + variable + model, data = total_wld2)
 
-# filter out duplicate unit-variable combinations
-total_wld2 <- filter(total_wld2, (!(unit == "mn USD" & model == "MAGNET") &
-                       !(unit == "1000 t" & model == "GLOBIOM")))
 
-unique(total_wld2$unit)
-
+### LEVEL PLOT
 # levelplot by diet
-levelplot_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+levelplot_f <- function(df, id_sel, reg = "WLD"){
+  df <- filter(df, id == id_sel, region == reg)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot() +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
@@ -148,14 +146,15 @@ levelplot_f <- function(df, id_sel){
     theme_bw()
   p
 }
-
-lapply(sel, function(x) levelplot_f(total_wld2, x))
+#lapply(sel, function(x) levelplot_f(total, x))
+#map2(c("CALO_AGR"), regions, function(a,b) levelplot_f(total, a, b))
+#map2(c("CALO_LSP"), regions, function(a,b) levelplot_f(total, a, b))
 
 
 # levelplot by diet
-levelplot2_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+levelplot2_f <- function(df, id_sel, reg = "WLD"){
+  df <- filter(df, id == id_sel, region == reg)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot() +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
@@ -169,12 +168,12 @@ levelplot2_f <- function(df, id_sel){
   p
 }
 
-lapply(sel, function(x) levelplot2_f(total_wld2, x))
+#lapply(sel, function(x) levelplot2_f(total, x))
 
 
-levelplot3_f <- function(df, id_sel){
-  df <- filter(df, id == id_sel)
-  title <- paste(df$variable, df$item, sep = "_")
+levelplot3_f <- function(df, id_sel, reg = "WLD"){
+  df <- filter(df, id == id_sel, region == reg)
+  title <- paste(df$variable, df$item, df$region, sep = "_")
   p = ggplot() +
     #scale_fill_manual(values = colour) +
     #geom_bar(stat="identity", colour = "black") + 
@@ -187,8 +186,9 @@ levelplot3_f <- function(df, id_sel){
     theme_bw()
   p
 }
-
-lapply(sel, function(x) levelplot3_f(total_wld2, x))
+#lapply(sel, function(x) levelplot3_f(total, x))
+#map2(c("CALO_AGR"), regions, function(a,b) levelplot3_f(total, a, b))
+#map2(c("CALO_LSP"), regions, function(a,b) barplot3_f(total, a, b))
 
 
 ### GDP AND POP PLOTS

@@ -106,7 +106,7 @@ rm(check2010)
 
 
 ### MAGNET
-MAGNET_raw <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-02-28.csv"))
+MAGNET_raw <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-03-05.csv"))
 
 ### REPLACE 2011 with 2010 values 
 MAGNET_raw <- MAGNET_raw %>%
@@ -140,7 +140,7 @@ rm(check2010)
 # Scenario list
 capri_scenario_list <- read_csv(file.path(dataPath, "Results/capri_scenario_list.csv"))
 
-CAPRI_raw <- read_delim(file.path(dataPath, "Results/AgMip_CAPRI_results_20180228.csv"), delim = ";") %>%
+CAPRI_raw <- read_delim(file.path(dataPath, "Results/AgMip_CAPRI_results_20180305.csv"), delim = ";") %>%
   setNames(c("model", "scenario_capri", "region", "item", "variable", "year", "unit", "value")) %>%
   filter(region %in% temp$Region[!is.na(temp$Region)]) %>%
   left_join(capri_scenario_list) %>%
