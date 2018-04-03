@@ -21,6 +21,10 @@ root <- find_root(is_rstudio_project)
 igdx(GAMSPath)
 # Make sure GDX2HAR.exe and gdxiomh.dll are located in one folder.
 
+### load fm2dm
+fm2dm <- read_xlsx(file.path(root, "Mappings/MAGNET_fm2dm.xlsx"), sheet = "fm2dm") %>%
+  dplyr::select(TRAD_COMM, fm2dm)
+
 
 ### SECTORS
 sec1 <- c("pdr", "wht", "grain", "oils", "sug", "hort", "crops", "oagr", "cattle", "pigpoul", "milk")
@@ -53,7 +57,10 @@ GN2O <- bind_rows(
 PROD <- current.f("PROD", "BaseData_b.gdx",  "QPROD", lookup_upd, "QPROD", c("PROD_SECT", "REG"), c("PROD_SECT", "REG")) %>%
   rename(TRAD_COMM = PROD_SECT) %>%
   filter(TRAD_COMM %in% sec1) %>%
-  mutate(value = value/1000, unit = "1000 t")
+  left_join(fm2dm) %>%
+  mutate(value = value/1000*fm2dm, unit = "1000 t") %>%
+  dplyr::select(-fm2dm)
+  
 
 # FOOD
 FOOD <- current.f("FOOD", "BaseData_b_view.gdx",  "NQSECT", lookup_upd_view, "NQSECT", c("NUTRIENTS", "PRIM_AGRI", "REG"), c("NUTRIENTS", "PRIM_AGRI","REG"))  %>%
