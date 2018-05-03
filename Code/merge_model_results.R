@@ -106,7 +106,7 @@ rm(check2010)
 
 
 ### MAGNET
-MAGNET_raw <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-03-30.csv"))
+MAGNET_raw <- read_csv(file.path(dataPath, "Results/agCLIM50II_MAGNET_2018-05-03.csv"))
 
 ### REPLACE 2011 with 2010 values 
 MAGNET_raw <- MAGNET_raw %>%
